@@ -14,3 +14,14 @@
 * `` mkdir build ``
 * `` cd build ``
 * `` cmake .. ``
+* `` make ``
+
+
+# Running instructions
+
+From build folder, run:
+
+* `` ./cv_flycapture ``
+
+Recording will imediatly start. Video file "out.avi" will be written video on pressing 'q' in the same folder.
+
