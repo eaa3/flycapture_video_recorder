@@ -58,7 +58,7 @@ int main()
 
 
 
-    
+    bool recording = false;
     while(key != 'q')
     {
         int64 t0 = cv::getTickCount();
@@ -82,7 +82,9 @@ int main()
         cv::Mat image = cv::Mat(rgbImage.GetRows(), rgbImage.GetCols(), CV_8UC3, rgbImage.GetData(),rowBytes);
 
         cv::imshow("image", image);
-        video.write(image);
+
+        if(recording)
+            video.write(image);
         
 
         int64 tf = cv::getTickCount();   
@@ -92,6 +94,12 @@ int main()
         int64 sleep_time = std::max(int64((period - time_elapsed)*1000),int64(1));
 
         key = cv::waitKey(sleep_time); 
+
+        if( key == 'r' ){
+            recording = !recording;
+
+            std::cout << "Recording: " << (recording? "True" : "False") << std::endl;
+        }
     }
 
     error = camera.StopCapture();
