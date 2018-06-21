@@ -49,9 +49,25 @@ int main()
         return false;
     } 
 
-    double MAX_FPS = 15;
-    double period = 1.0/MAX_FPS;
-    cv::VideoWriter video("out.avi",CV_FOURCC('M','J','P','G'), MAX_FPS, cv::Size(1280,960),true);
+    double MAX_FPS = 25;
+    double period = (1000*1.0)/MAX_FPS;
+
+
+    // Get the image
+    Image rawImage;
+    error = camera.RetrieveBuffer( &rawImage );
+    if ( error != PGRERROR_OK )
+    {
+        std::cout << "capture error" << std::endl;
+            return -1;
+    }
+
+    // convert to rgb
+    Image rgbImage;
+    rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &rgbImage );
+
+    std::cout << rgbImage.GetCols() << " x " << rgbImage.GetRows() << std::endl;
+    cv::VideoWriter video("out.avi",CV_FOURCC('M','J','P','G'), MAX_FPS, cv::Size(rgbImage.GetCols(),rgbImage.GetRows()),true);
 
     // capture loop
     char key = 0;
@@ -64,8 +80,7 @@ int main()
         int64 t0 = cv::getTickCount();
 
         // Get the image
-        Image rawImage;
-        Error error = camera.RetrieveBuffer( &rawImage );
+        error = camera.RetrieveBuffer( &rawImage );
         if ( error != PGRERROR_OK )
         {
                 std::cout << "capture error" << std::endl;
@@ -73,7 +88,6 @@ int main()
         }
 
         // convert to rgb
-        Image rgbImage;
         rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &rgbImage );
 
         //std::cout << rgbImage.GetCols() << " x " << rgbImage.GetRows() << std::endl;
@@ -89,9 +103,12 @@ int main()
 
         int64 tf = cv::getTickCount();   
 
-        double time_elapsed = (tf-t0)*1000/cv::getTickFrequency();
-
-        int64 sleep_time = std::max(int64((period - time_elapsed)*1000),int64(1));
+        double time_elapsed = (tf-t0)*1000.0/cv::getTickFrequency();
+        int64 dt = int64(period - time_elapsed);
+        int64 sleep_time = std::max(dt,int64(1));
+        // std::cout << "dt: " << dt << std::endl;
+        // std::cout << "time_elapsed: " << time_elapsed << std::endl;
+        // std::cout << "sleep_time: " << sleep_time << std::endl;
 
         key = cv::waitKey(sleep_time); 
 
